@@ -11,6 +11,7 @@ const port = 5000;
 const app = express();
 const upload = require("express-fileupload");
 const session = require("express-session");
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "ejs");
@@ -26,13 +27,13 @@ app.use(
     cookie: { secure: true },
   })
 );
+
 // Configuration
 cloudinary.config({
   cloud_name: "dgsvocf0w",
   api_key: "769681361645176",
-  api_secret: "mHZbyzlvJkB7UJgbcixvLXUszCg", // Click 'View API Keys' above to copy your API secret
+  api_secret: "mHZbyzlvJkB7UJgbcixvLXUszCg", 
 });
-
 
 // MongoDB Connection
 const connectDB = async () => {
@@ -57,10 +58,10 @@ app.get("/", (req, res) => {
 app.post("/", async (req, res) => {
   // Extracting fields from the request body
   const {
-    title,
+    title, 
     bulletPoint01,
     bulletPoint02,
-    bulletPoint03,
+    bulletPoint03, 
     bulletPoint04,
     bulletPoint05,
     bulletPoint06,
@@ -72,13 +73,36 @@ app.post("/", async (req, res) => {
     PackageInfo,
   } = req.body;
 
-  // Initialize an array to store the secure URLs of uploaded images
+
+  // Initialize arrays to store the secure URLs of uploaded images
   const imgPaths = [];
   const APlusImgPaths = [];
 
   if (req.files) {
     const files = Array.isArray(req.files.file) ? req.files.file : [req.files.file]; // Handle single or multiple files
-    const files2 = Array.isArray(req.files.APlusFile) ? req.files.APlusFile : [req.files.APlusFile]; // Handle single or multiple files
+    const files2 = Array.isArray(req.files.APlusFile) ? req.files.APlusFile : [req.files.APlusFile]; // Handle single or multiple APlus files
+
+    // files.forEach((value)=>{
+    //   const file = value.name;
+    //   value.mv("./uploads/ListingImg/"+file,(error)=>{
+    //     if (error) {
+    //       console.log(error);
+    //     }else{
+    //       console.log("successfull")
+    //     }
+    //   });
+    // })
+    // files.forEach((value)=>{
+    //   const file = value.name;
+    //   value.mv("./uploads/ListingImg/"+file,(error)=>{
+    //     if (error) {
+    //       console.log(error);
+    //     }else{
+    //       console.log("successfull")
+    //     }
+    //   });
+    // })
+    // Upload images for imgPaths
     const uploadPromises = files.map(file => {
       return new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream({
@@ -94,8 +118,25 @@ app.post("/", async (req, res) => {
       });
     });
 
+    // Upload images for APlusImgPaths
+    const uploadAPlusPromises = files2.map(file => {
+      return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream({
+          public_id: file.name, // Set the public ID to the file name
+        }, (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            APlusImgPaths.push(result.secure_url); // Push the secure URL to APlusImgPaths array
+            resolve(result);
+          }
+        }).end(file.data); // Pass the file buffer to the upload stream
+      });
+    });
+
     try {
-      await Promise.all(uploadPromises); // Wait for all uploads to complete
+      // Wait for all uploads to complete
+      await Promise.all([...uploadPromises, ...uploadAPlusPromises]);
 
       // Save the document with image URLs to the database
       const textModel = new TextModel({
@@ -112,24 +153,22 @@ app.post("/", async (req, res) => {
         manufacture,
         quantity,
         PackageInfo,
-        imgPaths, // Set the imgPaths array to the document
-        APlusImgPaths, // Set the imgPaths array to the document
+        imgPaths,      // Save imgPaths array
+        APlusImgPaths, // Save APlusImgPaths array
       });
 
-      await textModel.save(); // Save the document to the database
+      await textModel.save(); // Save the document to the database 
       const textId = textModel._id;
-      res.render("Text", { textId });
-      res.send("Files uploaded and data saved successfully!");
-    } catch (err) {
-      console.error(err);
+      res.render("Preview",{textModel,textId});
+    } catch (err) { 
+      console.error(err); 
       res.status(500).send("An error occurred while uploading the files.");
     }
-  } else {
+  } else { 
     res.status(400).send("No files uploaded.");
-  }
+  } 
 });
 
 app.listen(port, () => {
   console.log(`server is running on port ${port}`);
 });
- 
