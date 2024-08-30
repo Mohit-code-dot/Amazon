@@ -163,7 +163,7 @@ app.post("/", async (req, res) => {
     } catch (err) { 
       console.error(err); 
       res.status(500).send("An error occurred while uploading the files.");
-    }
+    } 
   } else { 
     res.status(400).send("No files uploaded.");
   } 
@@ -171,4 +171,4 @@ app.post("/", async (req, res) => {
 
 app.listen(port, () => {
   console.log(`server is running on port ${port}`);
-});
+}); 
