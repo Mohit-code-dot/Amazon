@@ -18,7 +18,7 @@
           </div>
           <div class="nav02text">
             <span>Deliver To</span><br />
-            <span>India</span>
+            <span>United States</span>
           </div>
         </div>
         <div class="nav03">
@@ -50,7 +50,7 @@
         <li>All</li>
         <li>Today's Deals</li>
         <li>Customer Service</li>
-        <li>Dhruv's Amazon.com</li>
+        <li>Your Amazon.com</li>
         <li>Buy Again</li>
         <li>Sell</li>
         <li>Gift Cards</li>
@@ -140,7 +140,7 @@
           </div>
         </div>
         <div class="sideMenu" onclick="showSideMenu()">
-          <img src="../Img/list.svg" alt="" />
+          <img src="../Img/list.png" alt="" />
         </div>
         <div class="div" style="width: 40%"></div>
         <form
@@ -150,10 +150,9 @@
           enctype="multipart/form-data"
         >
           <span id="removeApp" onclick="removeSideMenu()"
-            ><img src="../Img/x-square.svg" alt="" srcset=""
+            ><img src="../Img/x-square.png" alt="" srcset=""
           /></span>
           <div class="dashboard01">
-            <label>Title:</label>
             <textarea
               cols="30"
               rows="2"
@@ -163,7 +162,6 @@
             ></textarea>
           </div>
           <div class="dashboard02">
-            <label>Bullet Points:</label>
             <textarea
               id="input-field01"
               cols="30"
@@ -209,11 +207,17 @@
           </div>
 
           <div class="dashboard03">
-            <label>Image:</label>
-            <input type="file" name="file" multiple="multiple" />
+            <div class="listingInputWrapper">
+              <p>Upload Listing Image</p>
+              <input
+                id="ImgUploadButton"
+                type="file"
+                name="file"
+                multiple="multiple"
+              />
+            </div>
           </div>
           <div class="dashboard04">
-            <label>Brand Deatils:</label>
             <textarea
               name="price"
               id="brandDetail-input0"
@@ -264,11 +268,28 @@
             ></textarea>
           </div>
           <div class="dashboard05">
-            <label>A+ Image:</label>
-            <input type="file" name="APlusFile" multiple="multiple" />
+            <div class="listingInputWrapper">
+              <p>Upload A+ Image</p>
+              <input
+                id="ImgUploadButton"
+                type="file"
+                name="APlusFile"
+                multiple="multiple"
+              />
+            </div>
           </div>
           <input
-            style="width: 80%; font-size: 1rem; padding: 1rem; margin: 10px; cursor: pointer;"
+            style="
+              width: 60%;
+              font-size: 1rem;
+              padding: 1rem;
+              margin: 50px 10px 10px 10px;
+              cursor: pointer;
+              background: #000;
+              color: #fff;
+              border: none;
+              border-radius: 8px;
+            "
             type="submit"
             value="Step 1"
           />
