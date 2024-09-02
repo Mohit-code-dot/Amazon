@@ -55,6 +55,7 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
+
 app.post("/", async (req, res) => {
   // Extracting fields from the request body
   const {
@@ -73,50 +74,51 @@ app.post("/", async (req, res) => {
     PackageInfo,
   } = req.body;
 
-
   // Initialize arrays to store the secure URLs of uploaded images
   const imgPaths = [];
   const APlusImgPaths = [];
 
   if (req.files) {
-    const files = Array.isArray(req.files.file) ? req.files.file : [req.files.file]; // Handle single or multiple files
-    const files2 = Array.isArray(req.files.APlusFile) ? req.files.APlusFile : [req.files.APlusFile]; // Handle single or multiple APlus files
+    // Handle single or multiple files for main images
+    let files = Array.isArray(req.files.file) ? req.files.file : [req.files.file];
 
-    // Upload images for imgPaths
-    const uploadPromises = files.map(file => {
-      return new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream({
-          public_id: file.name, // Set the public ID to the file name
-        }, (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            imgPaths.push(result.secure_url); // Push the secure URL to imgPaths array
-            resolve(result);
-          }
-        }).end(file.data); // Pass the file buffer to the upload stream
-      });
-    });
+    // Handle single or multiple files for APlus images
+    let files2 = Array.isArray(req.files.APlusFile) ? req.files.APlusFile : [req.files.APlusFile];
 
-    // Upload images for APlusImgPaths
-    const uploadAPlusPromises = files2.map(file => {
-      return new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream({
-          public_id: file.name, // Set the public ID to the file name
-        }, (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            APlusImgPaths.push(result.secure_url); // Push the secure URL to APlusImgPaths array
-            resolve(result);
-          }
-        }).end(file.data); // Pass the file buffer to the upload stream
-      });
-    });
+    // Sort the files by their filenames in ascending order
+    files.sort((a, b) => a.name.localeCompare(b.name));
+    files2.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Function to upload images sequentially
+    const uploadSequentially = async (filesArray, imgPathsArray, prefix) => {
+      for (let i = 0; i < filesArray.length; i++) {
+        const file = filesArray[i];
+        const newPublicId = `${prefix}_${i + 1}_${Date.now()}`;
+        try {
+          const result = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream({
+              public_id: newPublicId, // Set the public ID to the new name
+            }, (error, result) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(result);
+              }
+            }).end(file.data); // Pass the file buffer to the upload stream
+          });
+          imgPathsArray.push(result.secure_url); // Push the secure URL to imgPaths array
+        } catch (err) {
+          throw err;
+        }
+      }
+    };
 
     try {
-      // Wait for all uploads to complete
-      await Promise.all([...uploadPromises, ...uploadAPlusPromises]);
+      // Upload main images sequentially
+      await uploadSequentially(files, imgPaths, 'img');
+
+      // Upload APlus images sequentially
+      await uploadSequentially(files2, APlusImgPaths, 'aplus');
 
       // Save the document with image URLs to the database
       const textModel = new TextModel({
@@ -139,7 +141,7 @@ app.post("/", async (req, res) => {
 
       await textModel.save(); // Save the document to the database 
       const textId = textModel._id;
-      res.render("Preview",{textModel,textId});
+      res.render("Preview", { textModel, textId });
     } catch (err) { 
       console.error(err); 
       res.status(500).send("An error occurred while uploading the files.");
@@ -148,6 +150,9 @@ app.post("/", async (req, res) => {
     res.status(400).send("No files uploaded.");
   } 
 });
+
+
+
 
 app.listen(port, () => {
   console.log(`server is running on port ${port}`);
