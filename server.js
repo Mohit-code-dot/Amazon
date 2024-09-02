@@ -55,6 +55,7 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
+
 app.post("/", async (req, res) => {
   // Extracting fields from the request body
   const {
@@ -73,35 +74,19 @@ app.post("/", async (req, res) => {
     PackageInfo,
   } = req.body;
 
-
   // Initialize arrays to store the secure URLs of uploaded images
   const imgPaths = [];
   const APlusImgPaths = [];
 
   if (req.files) {
-    const files = Array.isArray(req.files.file) ? req.files.file : [req.files.file]; // Handle single or multiple files
-    const files2 = Array.isArray(req.files.APlusFile) ? req.files.APlusFile : [req.files.APlusFile]; // Handle single or multiple APlus files
+    // Handle single or multiple files
+    let files = Array.isArray(req.files.file) ? req.files.file : [req.files.file];
+    let files2 = Array.isArray(req.files.APlusFile) ? req.files.APlusFile : [req.files.APlusFile];
 
-    // files.forEach((value)=>{
-    //   const file = value.name;
-    //   value.mv("./uploads/ListingImg/"+file,(error)=>{
-    //     if (error) {
-    //       console.log(error);
-    //     }else{
-    //       console.log("successfull")
-    //     }
-    //   });
-    // })
-    // files.forEach((value)=>{
-    //   const file = value.name;
-    //   value.mv("./uploads/ListingImg/"+file,(error)=>{
-    //     if (error) {
-    //       console.log(error);
-    //     }else{
-    //       console.log("successfull")
-    //     }
-    //   });
-    // })
+    // Sort the files by their filenames in ascending order
+    files.sort((a, b) => a.name.localeCompare(b.name));
+    files2.sort((a, b) => a.name.localeCompare(b.name));
+
     // Upload images for imgPaths
     const uploadPromises = files.map(file => {
       return new Promise((resolve, reject) => {
@@ -159,7 +144,7 @@ app.post("/", async (req, res) => {
 
       await textModel.save(); // Save the document to the database 
       const textId = textModel._id;
-      res.render("Preview",{textModel,textId});
+      res.render("Preview", { textModel, textId });
     } catch (err) { 
       console.error(err); 
       res.status(500).send("An error occurred while uploading the files.");
