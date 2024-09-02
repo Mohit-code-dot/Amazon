@@ -63,7 +63,7 @@
       <div class="mainImg">
         <div class="ListingImage">
           <% textModel.imgPaths.forEach((value)=> {%>
-          <img src="<%= value %>" alt="" srcset="" />
+          <img id="SmallListingImage" src="<%= value %>" alt="" srcset="" />
           <% });%>
         </div>
         <div class="mainBigImage image-container" id="image-container">
@@ -211,6 +211,14 @@
       const databaseIdPopUpSpan = document.querySelector(
         "#databaseIdPopUp span"
       );
+
+      const SmallListingImage = document.querySelectorAll("#SmallListingImage");
+      const mainBigImage = document.querySelector(".mainBigImage img")
+      SmallListingImage.forEach((value)=>{
+        value.addEventListener("mouseover",()=>{
+          mainBigImage.src = value.src;
+        })
+      })
 
       div.addEventListener("click", () => {
         divImg.style.display = "none";
